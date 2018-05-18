@@ -1,44 +1,47 @@
-#
-# Este script gera novos arquivos do LimeSurvey com os códigos (questões, subquestões e respostas) traduzidos
-# Entradas: planilha traduzida/revisada, arquivo de estrutura de questionário original, arquivo de dados original
-# Saídas: arquivo de dados com códigos traduzidos, arquivo de estrutura de questionário com códigos traduzidos
-#
+#!/usr/bin/python3
+
+"""
+Generates new files to LimeSurvey with codes (questions, subquestions,
+answers), translated
+Entry: spreadsheet translated/reviewd, file with original questionnaire
+structure, original data file
+Outputs: data file with translated codes, questionnaire structure file with
+translated codes
+
+TODO:
+Initial validations:
+- check for any untranslated code
+- check if any code contains whitespace or any special characters
+- check if any code has exceeded the maximum allowed character size:
+    question: limit = 20 characters
+    subquestion: limit = 20 characters
+    answer: limit = 5 characters
+- check for any duplicate code
+End validations:
+- check for any of the questions/subquestions/answers throughout the text
+- check if the questionnaire still works properly using it in NES
+- list the translations equal to originals
+Functional tests:
+- check if files are imported properly in LimeSurvey
+- check if it worked with the types of questions used
+';': 'Array (Flexible Labels) multiple texts',
+'*': 'Formula',
+'1': 'Dual Scale Array'
+'D': 'Date',
+'F': 'Array (Flexible Labels)',
+'H': 'Array (Flexible Labels) by Column',
+'L': 'List (Radio)',
+'M': 'Multiple choice'
+'N': 'Numerical Input'
+'P': 'Multiple choice with comments',
+'T': 'Long Free Text',
+'X': 'Boilerplate Question'
+- check if formulas continue to work
+"""
 
 import csv
-import xml.etree.ElementTree as etree
-
+from xml.etree import ElementTree as ETree
 from shutil import copyfile
-
-# validações iniciais:
-# - verificar se há algum código não traduzido
-# - verificar se algum código contém espaço em branco ou algum caracter especial
-# - verificar se algum código ultrapassou o tamanho máximo de caracteres permitidos
-#   .questão: limite = 20 caracteres
-#   .subquestão: limite = 20 caracteres
-#   .resposta: limite = 5 caracteres
-# - verificar se há algum código repetido
-
-# validações finais:
-# - verificar se há alguma das questões/subquestões/respostas por todo o texto
-# - verificar se o questionário ainda funciona adequadamente usando pelo NES
-# - listar as traduções iguais ao original
-
-# testes funcionais:
-# - verificar se arquivos são importados adequadamente no LimeSurvey
-# - verificar se funcionou com os tipos de questões utilizadas
-#       ';': 'Array (Flexible Labels) multiple texts',
-#       '*': 'Formula',
-#       '1': 'Array Dual Scale',
-#       'D': 'Date',
-#       'F': 'Array (Flexible Labels)',
-#       'H': 'Array (Flexible Labels) by Column',
-#       'L': 'List (Radio)',
-#       'M': 'Multiple choice',
-#       'N': 'Numerical Input',
-#       'P': 'Multiple choice with comments',
-#       'T': 'Long Free Text',
-#       'X': 'Boilerplate Question'
-# - verificar se as formulas continuam funcionando
 
 # Arquivos de entrada
 
@@ -72,7 +75,7 @@ input_csv_reviewed_spreadsheet = \
     "/Users/caco/Workspace/fields_translation/fields_translation/output" \
     "/spreadsheet_to_review_969322.csv"
 
-# Ler planilha-traduzida
+# read spreadsheet translated
 with open(input_csv_reviewed_spreadsheet, 'r') as f:
     reader = csv.reader(f)
     spreadsheet_list = list(reader)
@@ -145,7 +148,7 @@ output_new_lss_file_name = file_name_part_list[0] + "_new." + \
 # copyfile(input_lss_original_file_name, output_new_lss_file_name)
 copyfile(input_lss_original_file_name, "temp_lss.lss")
 
-tree = etree.parse("temp_lss.lss")
+tree = ETree.parse("temp_lss.lss")
 
 for item in tree.iterfind('questions/rows/row'):
     # fields to read:
