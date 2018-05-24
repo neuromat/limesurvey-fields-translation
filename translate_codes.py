@@ -41,6 +41,7 @@ Functional tests:
 import csv
 import getopt
 import sys
+import os
 from xml.etree import ElementTree as ETree
 from shutil import copyfile
 
@@ -86,10 +87,8 @@ def main(argv):
     with open(spreadsheet_input_file, 'r') as f:
         reader = csv.reader(f)
         spreadsheet_list = list(reader)
-
     questions = {}
     question_ids = {}
-
     current_question = None
 
     for index, line in enumerate(spreadsheet_list):
@@ -114,7 +113,6 @@ def main(argv):
                         'question_type': question_type,
                         'subquestions': {},
                         'answers': {}}
-
             elif item == "subquestion":
                 current_subquestion_code = line[6]
                 translated_subquestion_code = line[7]
@@ -128,7 +126,6 @@ def main(argv):
                             'translated_subquestion_code': translated_subquestion_code,
                             'subquestion_id': question_id
                         }
-
             elif item == "answer":
                 current_answer_code = line[8]
                 translated_answer_code = line[9]
@@ -188,16 +185,11 @@ def main(argv):
         naok_pos = relevance.find('NAOK', current_pos)
 
         while naok_pos != -1:
-
             # traducao do subquestion
-
             pieces = relevance[current_pos:naok_pos].split('X', maxsplit=2)
-
             # ultima parte pode conter subquestion_code
-            # print(pieces[-1])
             question_id = pieces[-1][:5]
             subquestion_code = pieces[-1][5:].split('.')[0].split('#')[0]
-
             if question_id in question_ids:
                 question_code = question_ids[question_id]
                 if question_code in questions:
@@ -234,16 +226,10 @@ def main(argv):
             naok_pos = relevance.find('NAOK', current_pos)
 
     for item in tree.iterfind('subquestions/rows/row'):
-        # fields to read:
-        #   gid
-        #   language
-        #   qid (subquestion id)
-        #   parent_qid (question id)
-        #   type (corresponde ao tipo da pergunta ou da subpergunta)
-        #   title (subquestion_code)
-        #   question (description, depends of the language)
-        #   question_order
-
+        # fields to read: gid, language, qid (subquestion id),
+        # parent_qid (question id), type (corresponde ao tipo da pergunta ou
+        # da subpergunta), title (subquestion_code), question (description,
+        # depends of the language), question_order
         question_id = item.findtext('parent_qid')
         if question_id in question_ids:
             question_code = question_ids[question_id]
@@ -253,10 +239,7 @@ def main(argv):
                     questions[question_code]['subquestions'][subquestion_code]['translated_subquestion_code']
 
     for item in tree.iterfind('answers/rows/row'):
-        # fields to read:
-        #   qid (question id)
-        #   code (answer code)
-
+        # fields to read: qid (question id), code (answer code)
         question_id = item.findtext('qid')
         if question_id in question_ids:
             question_code = question_ids[question_id]
@@ -298,7 +281,6 @@ def main(argv):
         output_new_lss_file_name, xml_declaration=True, encoding="UTF-8"
     )
 
-    # Abrir csv de dados original e gerar um traduzido
     # Open original csv data file and generate translated new one
     file_name = answers_input_file.split('.')
     output_new_csv_file_name = file_name[0] + "_new." + file_name[1]
@@ -308,6 +290,12 @@ def main(argv):
 
     for index, row in enumerate(original_data_file):
         if index == 1:
+            # TODO:
+            # multiple choice questions (type M) (not multiple questions
+            # with comments) is not captured here when there is a response
+            # with other option. The question code is not translated,
+            # and the imported responses will present error in this option.
+            # By now, correcting in the own new reponses csv generated.
             for question in questions:
                 if not questions[question]['subquestions']:
                     if question in row:
@@ -319,10 +307,13 @@ def main(argv):
                         if question + '_' + subquestion in row:
                             row = row.replace(
                                 question + '_' + subquestion,
-                                questions[question]['translated_question_code'] + '_' +
-                                questions[question]['subquestions'][subquestion]['translated_subquestion_code'])
-
+                                questions[question]['translated_question_code']
+                                + '_' +
+                                questions[question]['subquestions'][subquestion]['translated_subquestion_code']
+                            )
         translated_data_file.writelines(row)
+
+    os.remove('temp_lss.lss')
     print("Finished")
 
 
