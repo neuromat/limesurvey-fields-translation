@@ -113,12 +113,17 @@ special_question_codes = ['responsibleid', 'acquisitiondate', 'subjectid']
 #     '/Users/caco/Workspace/fields_translation/fields_translation/output/' \
 #     'spreadsheet_to_review_593324.csv'
 
+# input_lss_file_name = \
+#     '/Users/caco/Workspace/fields_translation/fields_translation/input' \
+#     '/limesurvey_survey_969322.lss'
+# output_csv_file_name = \
+#     '/Users/caco/Workspace/fields_translation/fields_translation/output' \
+#     '/spreadsheet_to_review_969322.csv'
+
 input_lss_file_name = \
-    '/Users/caco/Workspace/fields_translation/fields_translation/input' \
-    '/limesurvey_survey_969322.lss'
+    'limesurvey_survey_825482.lss'
 output_csv_file_name = \
-    '/Users/caco/Workspace/fields_translation/fields_translation/output' \
-    '/spreadsheet_to_review_969322.csv'
+    'spreadsheet_reviewed_825482.csv'
 
 groups = {}
 answers = {}
