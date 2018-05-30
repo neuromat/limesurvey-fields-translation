@@ -304,10 +304,13 @@ def main(argv):
                 else:
                     for subquestion in questions[question]['subquestions']:
                         if question + '_' + subquestion in row:
-                            # Needed to add '\t' to catch question + '_' +
+                            # Needed to add '\t' for catching question + '_' +
                             # subquestion exactly. Example:
                             #   lisneurolisenervo_1 -> mulLysisNerve_DS
                             #   lisneurolisenervo_10 -> mulLysisNerve_DS0
+                            # TODO:
+                            # Bug - putting '\t' break code with question
+                            # type array.
                             row = row.replace(
                                 question + '_' + subquestion + '\t',
                                 questions[question]['translated_question_code']
