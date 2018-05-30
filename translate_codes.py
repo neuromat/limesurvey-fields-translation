@@ -208,7 +208,6 @@ def main(argv):
                 question_code = question_ids[question_id]
                 if question_code in questions:
                     pieces = relevance[naok_pos + 9:].split('"')
-                    # print("%s" % (pieces[0]))
                     answer_code = pieces[0]
                     if 'answers' in questions[question_code]:
                         if answer_code in questions[question_code]['answers']:
@@ -305,11 +304,30 @@ def main(argv):
                 else:
                     for subquestion in questions[question]['subquestions']:
                         if question + '_' + subquestion in row:
+                            # Needed to add '\t' for catching question + '_' +
+                            # subquestion exactly. Example:
+                            #   lisneurolisenervo_1 -> mulLysisNerve_DS
+                            #   lisneurolisenervo_10 -> mulLysisNerve_DS0
+                            # TODO:
+                            # Bug - putting '\t' break code with question
+                            # type array.
                             row = row.replace(
-                                question + '_' + subquestion,
+                                question + '_' + subquestion + '\t',
                                 questions[question]['translated_question_code']
                                 + '_' +
-                                questions[question]['subquestions'][subquestion]['translated_subquestion_code']
+                                questions[question]['subquestions'][
+                                    subquestion][
+                                    'translated_subquestion_code'] + '\t'
+                            )
+                            # replace question + '_' + subquestion +
+                            # 'comment' that is not captured because the above
+                            row = row.replace(
+                                question + '_' + subquestion + 'comment',
+                                questions[question]['translated_question_code']
+                                + '_' +
+                                questions[question]['subquestions'][
+                                    subquestion][
+                                    'translated_subquestion_code'] + 'comment'
                             )
         translated_data_file.writelines(row)
 
