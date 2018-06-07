@@ -308,9 +308,6 @@ def main(argv):
                             # subquestion exactly. Example:
                             #   lisneurolisenervo_1 -> mulLysisNerve_DS
                             #   lisneurolisenervo_10 -> mulLysisNerve_DS0
-                            # TODO:
-                            # Bug - putting '\t' break code with question
-                            # type array.
                             row = row.replace(
                                 question + '_' + subquestion + '\t',
                                 questions[question]['translated_question_code']
@@ -319,16 +316,33 @@ def main(argv):
                                     subquestion][
                                     'translated_subquestion_code'] + '\t'
                             )
-                            # replace question + '_' + subquestion +
-                            # 'comment' that is not captured because the above
+                            # replace array questions
+                            # (e.g. opcSensi_Cinestesia_0)
                             row = row.replace(
-                                question + '_' + subquestion + 'comment',
+                                question + '_' + subquestion + '_',
                                 questions[question]['translated_question_code']
                                 + '_' +
                                 questions[question]['subquestions'][
                                     subquestion][
+                                    'translated_subquestion_code'] + '_'
+                            )
+                            # replace questions with comments
+                            row = row.replace(
+                                question + '_' + subquestion + 'comment',
+                                questions[question]['translated_question_code']
+                                + '_' +
+                                questions[question]['subquestions'][subquestion][
                                     'translated_subquestion_code'] + 'comment'
                             )
+                # replace multiple questions with
+                # "<question>_other", e.g. "lisDorPr_other"
+                if question + '_other' in row:
+                    row = row.replace(
+                        question + '_other',
+                        questions[question]['translated_question_code']
+                        + '_other'
+                    )
+
         translated_data_file.writelines(row)
 
     os.remove('temp_lss.lss')
