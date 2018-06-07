@@ -121,9 +121,9 @@ special_question_codes = ['responsibleid', 'acquisitiondate', 'subjectid']
 #     '/spreadsheet_to_review_969322.csv'
 
 input_lss_file_name = \
-    'limesurvey_survey_825482.lss'
+    'limesurvey_survey_256242.lss'
 output_csv_file_name = \
-    'spreadsheet_reviewed_825482.csv'
+    'spreadsheet_reviewed_256242.csv'
 
 groups = {}
 answers = {}
@@ -132,13 +132,11 @@ tree = ET.parse(input_lss_file_name)
 
 # navigate in "groups" elements
 for item in tree.iterfind('groups/rows/row'):
-
     # fields to read:
     #   gid
     #   language
     #   group_name (depends of the language)
     #   group_order
-
     gid = item.findtext('gid')
     language = item.findtext('language')
 
