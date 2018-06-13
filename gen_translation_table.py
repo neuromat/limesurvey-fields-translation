@@ -121,9 +121,9 @@ special_question_codes = ['responsibleid', 'acquisitiondate', 'subjectid']
 #     '/spreadsheet_to_review_969322.csv'
 
 input_lss_file_name = \
-    'limesurvey_survey_256242.lss'
+    'limesurvey_survey_772619.lss'
 output_csv_file_name = \
-    'spreadsheet_reviewed_256242.csv'
+    'spreadsheet_reviewed_772619.csv'
 
 groups = {}
 answers = {}
