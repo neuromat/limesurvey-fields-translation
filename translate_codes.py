@@ -45,6 +45,8 @@ import os
 from xml.etree import ElementTree as ETree
 from shutil import copyfile
 
+import pandas
+
 
 def parse_options(argv):
     lss_input_file = ''
@@ -208,7 +210,6 @@ def main(argv):
                 question_code = question_ids[question_id]
                 if question_code in questions:
                     pieces = relevance[naok_pos + 9:].split('"')
-                    # print("%s" % (pieces[0]))
                     answer_code = pieces[0]
                     if 'answers' in questions[question_code]:
                         if answer_code in questions[question_code]['answers']:
@@ -289,6 +290,8 @@ def main(argv):
     translated_data_file = open(output_new_csv_file_name, 'w')
 
     for index, row in enumerate(original_data_file):
+        if index == 0:
+            translated_data_file.writelines(row)  # TODO: improve?
         if index == 1:
             # TODO:
             # multiple choice questions (type M) (not multiple questions
@@ -305,14 +308,73 @@ def main(argv):
                 else:
                     for subquestion in questions[question]['subquestions']:
                         if question + '_' + subquestion in row:
+                            # Needed to add '\t' for catching question + '_' +
+                            # subquestion exactly. Example:
+                            #   lisneurolisenervo_1 -> mulLysisNerve_DS
+                            #   lisneurolisenervo_10 -> mulLysisNerve_DS0
                             row = row.replace(
-                                question + '_' + subquestion,
+                                question + '_' + subquestion + '\t',
                                 questions[question]['translated_question_code']
                                 + '_' +
-                                questions[question]['subquestions'][subquestion]['translated_subquestion_code']
+                                questions[question]['subquestions'][
+                                    subquestion][
+                                    'translated_subquestion_code'] + '\t'
                             )
-        translated_data_file.writelines(row)
+                            # replace array questions
+                            # (e.g. opcSensi_Cinestesia_0)
+                            row = row.replace(
+                                question + '_' + subquestion + '_',
+                                questions[question]['translated_question_code']
+                                + '_' +
+                                questions[question]['subquestions'][
+                                    subquestion][
+                                    'translated_subquestion_code'] + '_'
+                            )
+                            # replace questions with comments
+                            row = row.replace(
+                                question + '_' + subquestion + 'comment',
+                                questions[question]['translated_question_code']
+                                + '_' +
+                                questions[question]['subquestions'][subquestion][
+                                    'translated_subquestion_code'] + 'comment'
+                            )
+                # replace multiple questions with
+                # "<question>_other", e.g. "lisDorPr_other"
+                if question + '_other' in row:
+                    row = row.replace(
+                        question + '_other',
+                        questions[question]['translated_question_code']
+                        + '_other'
+                    )
+            translated_data_file.writelines(row)
 
+    # Check if all questions codes (not subquestions or answers) was
+    # translated in new vv file
+    # TODO
+
+    # Translate answers in the new vv file
+    answers = pandas.read_table(answers_input_file, skiprows=1)
+    for column in answers:
+        question = [q for q in questions if q in column]
+        if not question:
+            continue
+        else:
+            question = question[0]
+            if not questions[question]['answers']:
+                continue
+            else:
+                for index, answer in enumerate(answers[column]):
+                    if answer in questions[question]['answers']:
+                        answers[column][index] = questions[question]['answers'][
+                            answer]['translated_answer_code']
+    answers.to_csv('temp_translated_data_file.csv', sep='\t', index=False,
+                   header=False)
+    temp_translated_data_file = open('temp_translated_data_file.csv', 'r')
+    for index, row in enumerate(temp_translated_data_file):
+        translated_data_file.writelines(row)
+    translated_data_file.close()
+
+    os.remove('temp_translated_data_file.csv')
     os.remove('temp_lss.lss')
     print("Finished")
 
