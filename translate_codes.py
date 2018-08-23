@@ -45,6 +45,8 @@ import os
 from xml.etree import ElementTree as ETree
 from shutil import copyfile
 
+import pandas
+
 
 def parse_options(argv):
     lss_input_file = ''
@@ -288,6 +290,8 @@ def main(argv):
     translated_data_file = open(output_new_csv_file_name, 'w')
 
     for index, row in enumerate(original_data_file):
+        if index == 0:
+            translated_data_file.writelines(row)  # TODO: improve?
         if index == 1:
             # TODO:
             # multiple choice questions (type M) (not multiple questions
@@ -342,9 +346,35 @@ def main(argv):
                         questions[question]['translated_question_code']
                         + '_other'
                     )
+            translated_data_file.writelines(row)
 
+    # Check if all questions codes (not subquestions or answers) was
+    # translated in new vv file
+    # TODO
+
+    # Translate answers in the new vv file
+    answers = pandas.read_table(answers_input_file, skiprows=1)
+    for column in answers:
+        question = [q for q in questions if q in column]
+        if not question:
+            continue
+        else:
+            question = question[0]
+            if not questions[question]['answers']:
+                continue
+            else:
+                for index, answer in enumerate(answers[column]):
+                    if answer in questions[question]['answers']:
+                        answers[column][index] = questions[question]['answers'][
+                            answer]['translated_answer_code']
+    answers.to_csv('temp_translated_data_file.csv', sep='\t', index=False,
+                   header=False)
+    temp_translated_data_file = open('temp_translated_data_file.csv', 'r')
+    for index, row in enumerate(temp_translated_data_file):
         translated_data_file.writelines(row)
+    translated_data_file.close()
 
+    os.remove('temp_translated_data_file.csv')
     os.remove('temp_lss.lss')
     print("Finished")
 
